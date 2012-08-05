@@ -1008,9 +1008,8 @@ class PEAR_Config extends PEAR
      *
      * @param string file to read from
      * @return array configuration data or a PEAR error on failure
-     * @access private
      */
-    function _readConfigDataFrom($file)
+    private function _readConfigDataFrom($file)
     {
         $fp = false;
         if (file_exists($file)) {

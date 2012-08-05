@@ -41,45 +41,38 @@ class PEAR_DependencyDB
     /**
      * This is initialized by {@link setConfig()}
      * @var PEAR_Config
-     * @access private
      */
-    var $_config;
+    private $_config;
     /**
      * This is initialized by {@link setConfig()}
      * @var PEAR_Registry
-     * @access private
      */
-    var $_registry;
+    private $_registry;
     /**
      * Filename of the dependency DB (usually .depdb)
      * @var string
-     * @access private
      */
-    var $_depdb = false;
+    private $_depdb = false;
     /**
      * File name of the lockfile (usually .depdblock)
      * @var string
-     * @access private
      */
-    var $_lockfile = false;
+    private $_lockfile = false;
     /**
      * Open file resource for locking the lockfile
      * @var resource|false
-     * @access private
      */
-    var $_lockFp = false;
+    private $_lockFp = false;
     /**
      * API version of this class, used to validate a file on-disk
      * @var string
-     * @access private
      */
-    var $_version = '1.0';
+    private $_version = '1.0';
     /**
      * Cached dependency database file
      * @var array|null
-     * @access private
      */
-    var $_cache;
+    private $_cache;
 
     // }}}
     // {{{ & singleton()
@@ -89,9 +82,8 @@ class PEAR_DependencyDB
      * @param PEAR_Config
      * @param string|false full path to the dependency database, or false to use default
      * @return PEAR_DependencyDB|PEAR_Error
-     * @static
      */
-    function &singleton(&$config, $depdb = false)
+    public static function &singleton(&$config, $depdb = false)
     {
         $phpdir = $config->get('php_dir', null, 'pear.php.net');
         if (!isset($GLOBALS['_PEAR_DEPENDENCYDB_INSTANCE'][$phpdir])) {
@@ -112,7 +104,7 @@ class PEAR_DependencyDB
      * @param PEAR_Config|false
      * @param string|false full path to the dependency database, or false to use default
      */
-    function setConfig(&$config, $depdb = false)
+    public function setConfig(&$config, $depdb = false)
     {
         if (!$config) {
             $this->_config = &PEAR_Config::singleton();
@@ -132,7 +124,7 @@ class PEAR_DependencyDB
     }
     // }}}
 
-    function hasWriteAccess()
+    public function hasWriteAccess()
     {
         if (!file_exists($this->_depdb)) {
             $dir = $this->_depdb;
@@ -160,7 +152,7 @@ class PEAR_DependencyDB
      * newer than the code reading it.
      * @return void|PEAR_Error
      */
-    function assertDepsDB()
+    public function assertDepsDB()
     {
         if (!is_file($this->_depdb)) {
             $this->rebuildDB();
@@ -185,7 +177,7 @@ class PEAR_DependencyDB
      * @param PEAR_PackageFile_v1|PEAR_PackageFile_v2|array
      * @return array|false
      */
-    function getDependentPackages(&$pkg)
+    public function getDependentPackages(&$pkg)
     {
         $data = $this->_getDepDB();
         if (is_object($pkg)) {
@@ -209,7 +201,7 @@ class PEAR_DependencyDB
      * @param PEAR_PackageFile_v1|PEAR_PackageFile_v2|array
      * @return array|false
      */
-    function getDependentPackageDependencies(&$pkg)
+    public function getDependentPackageDependencies(&$pkg)
     {
         $data = $this->_getDepDB();
         if (is_object($pkg)) {
@@ -254,7 +246,7 @@ class PEAR_DependencyDB
      * @param PEAR_PackageFile_v1|PEAR_PackageFile_v2|array
      * @return array|false
      */
-    function getDependencies(&$pkg)
+    public function getDependencies(&$pkg)
     {
         if (is_object($pkg)) {
             $channel = strtolower($pkg->getChannel());
@@ -277,14 +269,14 @@ class PEAR_DependencyDB
      * @param array|PEAR_PackageFile_v2|PEAR_PackageFile_v2
      * @param array|PEAR_PackageFile_v2|PEAR_PackageFile_v2
      */
-    function dependsOn($parent, $child)
+    public function dependsOn($parent, $child)
     {
         $c = array();
         $this->_getDepDB();
         return $this->_dependsOn($parent, $child, $c);
     }
 
-    function _dependsOn($parent, $child, &$checked)
+    private function _dependsOn($parent, $child, &$checked)
     {
         if (is_object($parent)) {
             $channel = strtolower($parent->getChannel());
@@ -354,7 +346,7 @@ class PEAR_DependencyDB
      * Register dependencies of a package that is being installed or upgraded
      * @param PEAR_PackageFile_v2|PEAR_PackageFile_v2
      */
-    function installPackage(&$package)
+    public function installPackage(&$package)
     {
         $data = $this->_getDepDB();
         unset($this->_cache);
@@ -369,7 +361,7 @@ class PEAR_DependencyDB
      * @param PEAR_PackageFile_v1|PEAR_PackageFile_v2|array If an array, then it must have
      *        indices 'channel' and 'package'
      */
-    function uninstallPackage(&$pkg)
+    public function uninstallPackage(&$pkg)
     {
         $data = $this->_getDepDB();
         unset($this->_cache);
@@ -432,7 +424,7 @@ class PEAR_DependencyDB
      * Rebuild the dependency DB by reading registry entries.
      * @return true|PEAR_Error
      */
-    function rebuildDB()
+    public function rebuildDB()
     {
         $depdb = array('_version' => $this->_version);
         if (!$this->hasWriteAccess()) {
@@ -468,9 +460,8 @@ class PEAR_DependencyDB
      * Register usage of the dependency DB to prevent race conditions
      * @param int one of the LOCK_* constants
      * @return true|PEAR_Error
-     * @access private
      */
-    function _lock($mode = LOCK_EX)
+    private function _lock($mode = LOCK_EX)
     {
         if (stristr(php_uname(), 'Windows 9')) {
             return true;
@@ -519,9 +510,8 @@ class PEAR_DependencyDB
     /**
      * Release usage of dependency DB
      * @return true|PEAR_Error
-     * @access private
      */
-    function _unlock()
+    private function _unlock()
     {
         $ret = $this->_lock(LOCK_UN);
         if (is_resource($this->_lockFp)) {
@@ -535,7 +525,7 @@ class PEAR_DependencyDB
      * Load the dependency database from disk, or return the cache
      * @return array|PEAR_Error
      */
-    function _getDepDB()
+    private function _getDepDB()
     {
         if (!$this->hasWriteAccess()) {
             return array('_version' => $this->_version);
@@ -564,9 +554,8 @@ class PEAR_DependencyDB
      * Write out the dependency database to disk
      * @param array the database
      * @return true|PEAR_Error
-     * @access private
      */
-    function _writeDepDB(&$deps)
+    private function _writeDepDB(&$deps)
     {
         if (PEAR::isError($e = $this->_lock(LOCK_EX))) {
             return $e;
@@ -592,9 +581,8 @@ class PEAR_DependencyDB
      * "installing" the package's dependency information
      * @param array the database
      * @param PEAR_PackageFile_v1|PEAR_PackageFile_v2
-     * @access private
      */
-    function _setPackageDeps(&$data, &$pkg)
+    private function _setPackageDeps(&$data, &$pkg)
     {
         $pkg->setConfig($this->_config);
         if ($pkg->getPackagexmlVersion() == '1.0') {
@@ -709,7 +697,7 @@ class PEAR_DependencyDB
      * @param required|optional whether this is a required or an optional dep
      * @param string|false dependency group this dependency is from, or false for ordinary dep
      */
-    function _registerDep(&$data, &$pkg, $dep, $type, $group = false)
+    private function _registerDep(&$data, &$pkg, $dep, $type, $group = false)
     {
         $info = array(
             'dep'   => $dep,
