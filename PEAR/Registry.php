@@ -1801,6 +1801,14 @@ class PEAR_Registry extends PEAR
     function addChannel($channel, $lastmodified = false, $update = false)
     {
         if (!is_a($channel, 'PEAR_ChannelFile') || !$channel->validate()) {
+            if (!$channel->validate()) {
+                $msg    = '';
+                $errors = $channel->getErrors();
+                foreach ($errors as $error) {
+                    $msg .= $error['message'] . ', ';
+                }
+                return PEAR::raiseError(substr($msg, 0, -2));
+            }
             return false;
         }
 
